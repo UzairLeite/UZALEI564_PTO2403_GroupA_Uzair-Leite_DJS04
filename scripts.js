@@ -1,4 +1,4 @@
-import { books, authors, genres, BOOKS_PER_PAGE } from './data.js'
+import { books, authors, genres, BOOKS_PER_PAGE } from './data.js';
 
 let page = 1;
 let matches = books;
@@ -107,7 +107,7 @@ function handleSearchSubmit(event) {
     // Update page and matches
     page = 1;
     matches = filteredBooks;
-    displaySearchResults(filteredBooks);
+    renderBooks(filteredBooks);
 }
 
 // Filters books based on provided filters
@@ -120,4 +120,19 @@ function handleSearchSubmit(event) {
 function filterBooks(books, filters) {
     return books.filter(book => {
         const genreMatch = filters.genre === 'any' || book.genres.includes(filters.genre);
-        const titleMatch = filters.title.trim() === '' || book.title.toLowerCase().includ
+        const titleMatch = filters.title.trim() === '' || book.title.toLowerCase().includes(filters.title.toLowerCase());
+        const authorMatch = filters.author === 'any' || book.author === filters.author;
+
+        return genreMatch && titleMatch && authorMatch;
+    });
+}
+
+// Initialize genre and author options
+createGenreOptions();
+createAuthorOptions();
+
+// Event listener for form submission
+document.querySelector('[data-search-form]').addEventListener('submit', handleSearchSubmit);
+
+// Initial render of books
+renderBooks(books.slice(0, BOOKS_PER_PAGE));

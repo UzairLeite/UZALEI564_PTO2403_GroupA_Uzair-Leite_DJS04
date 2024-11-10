@@ -1,61 +1,76 @@
-// Define the BookPreview Web Component
+// BookPreview Web Component
 class BookPreview extends HTMLElement {
-    // Constructor - Initializes the element and attaches Shadow DOM
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
     }
 
-    // Set observed attributes if the component's properties need to be dynamic
     static get observedAttributes() {
         return ['book'];
     }
 
-    // Attribute change callback (optional, if you need to update when the property changes)
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === 'book') {
             this.render();
         }
     }
 
-    // Connected callback (runs when the element is added to the DOM)
     connectedCallback() {
         this.render();
     }
 
-    // Render the book preview element inside the Shadow DOM
     render() {
         const book = JSON.parse(this.getAttribute('book'));
 
-        // Exit early if the book data is not set
         if (!book) return;
 
-        // Shadow DOM template (HTML + CSS)
         this.shadowRoot.innerHTML = `
+            <style>
+                .preview {
+                    width: 100%;
+                    padding: 1rem;
+                    display: flex;
+                    align-items: center;
+                    cursor: pointer;
+                    border-radius: 8px;
+                    border: 1px solid rgba(var(--color-dark), 0.15);
+                    background: rgba(var(--color-light), 1);
+                }
+                .preview:hover {
+                    background: rgba(var(--color-blue), 0.05);
+                }
+                .preview__image {
+                    width: 48px;
+                    height: 70px;
+                    object-fit: cover;
+                    border-radius: 2px;
+                    box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2);
+                }
+                .preview__info {
+                    padding: 1rem;
+                }
+                .preview__title {
+                    font-weight: bold;
+                    color: rgba(var(--color-dark), 0.8);
+                }
+                .preview__author {
+                    color: rgba(var(--color-dark), 0.4);
+                }
+            </style>
+            <div class="preview" data-preview="${book.id}">
+                <img class="preview__image" src="${book.image}" alt="${book.title}" />
+                <div class="preview__info">
+                    <h3 class="preview__title">${book.title}</h3>
+                    <div class="preview__author">${authors[book.author]}</div>
+                </div>
+            </div>
+        `;
     }
+}
 
-// Register the custom element
 customElements.define('book-preview', BookPreview);
 
-// Function to render a list of books using the BookPreview Web Component
-function renderBooks(bookList) {
-    const bookContainer = document.querySelector('[data-list-items]');
-    const fragment = document.createDocumentFragment();
-
-    bookList.slice(0, BOOKS_PER_PAGE).forEach(book => {
-        const bookPreview = document.createElement('book-preview');
-        
-        // Pass the book data as a JSON string to the book-preview component
-        bookPreview.setAttribute('book', JSON.stringify(book));
-        
-        // Append the book preview to the fragment
-        fragment.appendChild(bookPreview);
-    });
-
-    bookContainer.innerHTML = '';  // Clear the container before appending new books
-    bookContainer.appendChild(fragment);  // Append the updated list of book previews
-}
-
+// GenreSelector Component
 class GenreSelector extends HTMLElement {
     constructor() {
         super();
@@ -68,7 +83,7 @@ class GenreSelector extends HTMLElement {
 
     render() {
         const genres = JSON.parse(this.getAttribute('genres'));
-        
+
         if (!genres) return;
 
         this.shadowRoot.innerHTML = `
@@ -81,85 +96,13 @@ class GenreSelector extends HTMLElement {
             </style>
             <select>
                 <option value="any">All Genres</option>
-                ${genres.map(genre => `<option value="${genre.id}">${genre.name}</option>`).join('')}
-            </select>
-        `;
-    }
-}
-
-class GenreSelector extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-    }
-
-    connectedCallback() {
-        this.render();
-    }
-
-    render() {
-        const genres = JSON.parse(this.getAttribute('genres'));
-        
-        if (!genres) return;
-
-        this.shadowRoot.innerHTML = `
-            <style>
-                select {
-                    font-size: 16px;
-                    padding: 5px;
-                    margin: 5px 0;
-                }
-            </style>
-            <select>
-                <option value="any">All Genres</option>
-                ${genres.map(genre => `<option value="${genre.id}">${genre.name}</option>`).join('')}
-            </select>
-        `;
-    }
-}
-class GenreSelector extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-    }
-
-    static get observedAttributes() {
-        return ['genres'];
-    }
-
-    connectedCallback() {
-        this.render();
-    }
-
-    set genres(value) {
-        this._genres = value;
-        this.render();
-    }
-
-    get genres() {
-        return this._genres;
-    }
-
-    render() {
-        if (!this._genres) return;
-
-        const genreOptions = Object.entries(this._genres).map(([id, name]) => 
-            `<option value="${id}">${name}</option>`
-        ).join('');
-
-        this.shadowRoot.innerHTML = `
-            <style>
-                select {
-                    font-size: 16px;
-                    padding: 5px;
-                }
-            </style>
-            <select>
-                <option value="any">All Genres</option>
-                ${genreOptions}
+                ${Object.entries(genres)
+                    .map(([id, name]) => `<option value="${id}">${name}</option>`)
+                    .join('')}
             </select>
         `;
     }
 }
 
 customElements.define('genre-selector', GenreSelector);
+
